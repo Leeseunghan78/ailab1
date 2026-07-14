@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나의 일잘러 유형 테스트</title>
+<style>
+  :root {
+    --bg-start: #1a1a2e;
+    --bg-end: #16213e;
+    --card-bg: #ffffff;
+    --text-dark: #222;
+    --text-muted: #777;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+    font-family: "Apple SD Gothic Neo", "Malgun Gothic", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background: var(--card-bg);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    padding: 40px 32px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.4s ease;
+  }
+
+  .screen { display: none; animation: fadeIn 0.4s ease; }
+  .screen.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- Start screen ---------- */
+  #start-screen { text-align: center; }
+  .start-emoji { font-size: 64px; margin-bottom: 8px; }
+  #start-screen h1 {
+    font-size: 24px;
+    margin: 0 0 12px;
+    color: var(--text-dark);
+  }
+  #start-screen p {
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0 0 28px;
+  }
+  .btn-primary {
+    display: inline-block;
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    background: #4D96FF;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(77,150,255,0.4); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .meta-info {
+    margin-top: 18px;
+    font-size: 13px;
+    color: #aaa;
+  }
+
+  /* ---------- Quiz screen ---------- */
+  .progress-track {
+    width: 100%;
+    height: 8px;
+    background: #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #4D96FF;
+    width: 0%;
+    transition: width 0.35s ease;
+    border-radius: 8px;
+  }
+  .progress-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    text-align: right;
+  }
+  #question-text {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1.5;
+    margin-bottom: 24px;
+    min-height: 60px;
+  }
+  .answers { display: flex; flex-direction: column; gap: 10px; }
+  .answer-btn {
+    text-align: left;
+    padding: 14px 16px;
+    border: 2px solid #eee;
+    border-radius: 14px;
+    background: #fafafa;
+    font-size: 15px;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .answer-btn:hover {
+    border-color: #4D96FF;
+    background: #f0f6ff;
+    transform: translateX(2px);
+  }
+
+  /* ---------- Result screen ---------- */
+  #result-screen { text-align: center; }
+  .result-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    font-size: 68px;
+    margin-bottom: 20px;
+    transform: scale(0);
+  }
+  .result-badge.pop {
+    animation: popIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes popIn {
+    0%   { transform: scale(0) rotate(-20deg); }
+    60%  { transform: scale(1.15) rotate(8deg); }
+    80%  { transform: scale(0.95) rotate(-4deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+
+  .result-label {
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  #result-name {
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0 0 16px;
+  }
+  #result-desc {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #444;
+    background: #f7f7f9;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 24px;
+    text-align: left;
+  }
+  .result-actions { display: flex; gap: 10px; }
+  .btn-secondary {
+    flex: 1;
+    padding: 14px;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-secondary:hover { background: #f5f5f5; }
+  .btn-share {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-share:hover { filter: brightness(1.08); }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #222;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- 시작 화면 -->
+  <div id="start-screen" class="screen active">
+    <div class="start-emoji">🧑‍💼</div>
+    <h1>나의 일잘러 유형 테스트</h1>
+    <p>
+      회의실, 마감 직전, 갑작스러운 야근까지—<br>
+      당신은 어떤 방식으로 일을 해내는 사람인가요?<br>
+      8개의 질문으로 나만의 "일잘러 DNA"를 확인해보세요.
+    </p>
+    <button class="btn-primary" onclick="startQuiz()">테스트 시작하기 →</button>
+    <div class="meta-info">⏱️ 약 1분 소요 · 6가지 유형</div>
+  </div>
+
+  <!-- 퀴즈 화면 -->
+  <div id="quiz-screen" class="screen">
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-label" id="progress-label">1 / 8</div>
+    <div id="question-text"></div>
+    <div class="answers" id="answers-container"></div>
+  </div>
+
+  <!-- 결과 화면 -->
+  <div id="result-screen" class="screen">
+    <div class="result-label">당신의 일잘러 유형은</div>
+    <div class="result-badge" id="result-badge"></div>
+    <h2 id="result-name"></h2>
+    <div id="result-desc"></div>
+    <div class="result-actions">
+      <button class="btn-secondary" onclick="restartQuiz()">다시하기</button>
+      <button class="btn-share" id="share-btn" onclick="shareResult()">결과 공유하기</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">결과가 클립보드에 복사되었어요 📋</div>
+
+<script>
+  // ---------- 데이터 정의 ----------
+  const TYPES = {
+    bulldozer: {
+      name: "🚀 불도저 추진형",
+      emoji: "🚀",
+      color: "#FF6B6B",
+      desc: "생각은 짧게, 행동은 빠르게! 일단 저지르고 보는 당신은 팀의 추진력 그 자체입니다. 완벽한 계획보다 완벽한 실행으로 승부하는 타입. \"고민할 시간에 하나라도 더 해보자\"가 인생 모토죠."
+    },
+    strategist: {
+      name: "🧠 전략가 분석형",
+      emoji: "🧠",
+      color: "#4D96FF",
+      desc: "숫자와 근거 없이는 한 발짝도 안 움직이는 당신. 리스크를 미리 계산하고 최적의 루트를 찾아내는 팀의 브레인입니다. 즉흥적인 결정보다 탄탄한 계획을 신뢰하는 타입."
+    },
+    idea: {
+      name: "💡 아이디어 뱅크형",
+      emoji: "💡",
+      color: "#FFC93C",
+      desc: "늘 새로운 관점으로 세상을 보는 당신. 팀 회의가 지루할 틈이 없는 창의력 발전소입니다. \"이렇게 하면 재밌지 않을까?\"라는 말을 입에 달고 사는 아이디어 제조기."
+    },
+    relation: {
+      name: "🤝 관계의 마법사",
+      emoji: "🤝",
+      color: "#6BCB77",
+      desc: "사람과 사람 사이를 잇는 데 탁월한 당신. 갈등은 줄이고 팀워크는 끌어올리는 사내 분위기 메이커입니다. 일도 결국 사람이 하는 거라는 걸 아는 타입."
+    },
+    detail: {
+      name: "🔍 디테일 장인",
+      emoji: "🔍",
+      color: "#9B59B6",
+      desc: "남들이 놓치는 오타 하나까지 잡아내는 당신. 완성도의 끝판왕이자 팀의 마지막 방어선입니다. \"이 정도면 됐다\"는 말이 세상에서 제일 어려운 타입."
+    },
+    allrounder: {
+      name: "🛠️ 만능 해결사",
+      emoji: "🛠️",
+      color: "#FF9F45",
+      desc: "어떤 문제든 일단 던져보세요. 경험과 노하우로 뚝딱 해결해버리는 팀의 맥가이버입니다. 화려하진 않아도 결국 일이 되게 만드는 진짜 실력자."
+    }
+  };
+
+  const QUESTIONS = [
+    {
+      q: "Q1. 회의 중 팀장이 갑자기 \"이거 누가 맡을래?\" 라고 묻는다면?",
+      answers: [
+        { text: "\"제가 할게요!\" 일단 손부터 든다", type: "bulldozer" },
+        { text: "리스크와 일정부터 머릿속으로 계산해본다", type: "strategist" },
+        { text: "색다른 접근법이 떠올라 눈이 반짝인다", type: "idea" },
+        { text: "옆 사람과 눈빛 교환 후 같이 하자고 제안", type: "relation" },
+        { text: "\"세부 요구사항부터 정리해주세요\"라고 요청", type: "detail" },
+        { text: "비슷한 걸 해본 적 있어서 조용히 손든다", type: "allrounder" }
+      ]
+    },
+    {
+      q: "Q2. 마감 전날, 일정이 갑자기 앞당겨졌다는 연락을 받았다!",
+      answers: [
+        { text: "일단 바로 실행 모드 돌입, 몸이 먼저 움직인다", type: "bulldozer" },
+        { text: "우선순위 재조정 표부터 만든다", type: "strategist" },
+        { text: "더 빠르게 끝낼 방법 없을까 브레인스토밍", type: "idea" },
+        { text: "관련자들에게 바로 연락 돌려 상황부터 공유", type: "relation" },
+        { text: "체크리스트를 다시 점검, 놓친 게 없는지 확인", type: "detail" },
+        { text: "예전 비슷한 위기를 떠올리며 침착하게 대응", type: "allrounder" }
+      ]
+    },
+    {
+      q: "Q3. 새로운 업무 툴을 익혀야 할 때, 당신은?",
+      answers: [
+        { text: "일단 눌러보면서 몸으로 배운다", type: "bulldozer" },
+        { text: "매뉴얼과 단축키부터 정독한다", type: "strategist" },
+        { text: "나만의 색다른 활용법을 실험해본다", type: "idea" },
+        { text: "잘 아는 동료에게 바로 물어본다", type: "relation" },
+        { text: "모든 메뉴와 기능을 하나하나 확인한다", type: "detail" },
+        { text: "필요한 핵심 기능만 빠르게 캐치한다", type: "allrounder" }
+      ]
+    },
+    {
+      q: "Q4. 팀 프로젝트에서 의견이 충돌했다!",
+      answers: [
+        { text: "일단 되는 방향으로 밀어붙인다", type: "bulldozer" },
+        { text: "데이터와 근거로 논리적으로 설득한다", type: "strategist" },
+        { text: "둘 다 아닌 제3의 대안을 제시한다", type: "idea" },
+        { text: "양쪽 입장을 조율하는 중재자가 된다", type: "relation" },
+        { text: "놓친 디테일이 있는지 다시 검토하자고 한다", type: "detail" },
+        { text: "실현 가능성 위주로 정리해 결론을 낸다", type: "allrounder" }
+      ]
+    },
+    {
+      q: "Q5. 상사에게 뼈아픈 피드백을 받았다.",
+      answers: [
+        { text: "일단 바로 수정해서 다시 제출한다", type: "bulldozer" },
+        { text: "왜 그런 피드백을 받았는지 논리적으로 분석한다", type: "strategist" },
+        { text: "아예 새로운 버전으로 접근해본다", type: "idea" },
+        { text: "감사 인사와 함께 방향을 다시 확인한다", type: "relation" },
+        { text: "세세한 부분까지 다 체크하며 수정한다", type: "detail" },
+        { text: "핵심만 빠르게 캐치해 효율적으로 반영한다", type: "allrounder" }
+      ]
+    },
+    {
+      q: "Q6. 오늘 야근이 불가피하다. 당신의 선택은?",
+      answers: [
+        { text: "그냥 한다, 끝날 때까지 버틴다", type: "bulldozer" },
+        { text: "효율적으로 끝낼 계획부터 세운다", type: "strategist" },
+        { text: "더 빠르고 창의적인 해결책을 찾아본다", type: "idea" },
+        { text: "팀원들과 업무를 나눠서 함께 한다", type: "relation" },
+        { text: "실수 없이 꼼꼼하게 마무리한다", type: "detail" },
+        { text: "노하우를 총동원해 시간을 확 줄인다", type: "allrounder" }
+      ]
+    },
+    {
+      q: "Q7. 동료들이 몰래 지어준 나의 별명은?",
+      answers: [
+        { text: "돌격대장", type: "bulldozer" },
+        { text: "전략가", type: "strategist" },
+        { text: "아이디어 뱅크", type: "idea" },
+        { text: "분위기 메이커", type: "relation" },
+        { text: "완벽주의자", type: "detail" },
+        { text: "만능 해결사", type: "allrounder" }
+      ]
+    },
+    {
+      q: "Q8. 이상적인 주말 계획은?",
+      answers: [
+        { text: "일단 나가서 몸을 움직이는 액티비티", type: "bulldozer" },
+        { text: "다음 주 계획을 미리 세우는 시간", type: "strategist" },
+        { text: "새로운 전시·콘텐츠로 영감 채우기", type: "idea" },
+        { text: "친구들과 만나 수다 떨며 힐링", type: "relation" },
+        { text: "방 정리, 다이어리 정리 등 리셋의 시간", type: "detail" },
+        { text: "밀린 집안일 뚝딱 해치우기", type: "allrounder" }
+      ]
+    }
+  ];
+
+  // ---------- 상태 ----------
+  let currentQuestion = 0;
+  let scores = {};
+
+  function resetScores() {
+    scores = {};
+    Object.keys(TYPES).forEach(key => scores[key] = 0);
+  }
+
+  function startQuiz() {
+    resetScores();
+    currentQuestion = 0;
+    show("quiz-screen");
+    renderQuestion();
+  }
+
+  function show(id) {
+    document.querySelectorAll(".screen").forEach(el => el.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+  }
+
+  function renderQuestion() {
+    const total = QUESTIONS.length;
+    const q = QUESTIONS[currentQuestion];
+
+    document.getElementById("progress-fill").style.width = ((currentQuestion) / total * 100) + "%";
+    document.getElementById("progress-label").textContent = (currentQuestion + 1) + " / " + total;
+    document.getElementById("question-text").textContent = q.q;
+
+    const container = document.getElementById("answers-container");
+    container.innerHTML = "";
+    q.answers.forEach(ans => {
+      const btn = document.createElement("button");
+      btn.className = "answer-btn";
+      btn.textContent = ans.text;
+      btn.onclick = () => selectAnswer(ans.type);
+      container.appendChild(btn);
+    });
+  }
+
+  function selectAnswer(type) {
+    scores[type]++;
+    currentQuestion++;
+    if (currentQuestion < QUESTIONS.length) {
+      renderQuestion();
+    } else {
+      document.getElementById("progress-fill").style.width = "100%";
+      showResult();
+    }
+  }
+
+  function getResultType() {
+    let best = null;
+    let bestScore = -1;
+    Object.keys(TYPES).forEach(key => {
+      if (scores[key] > bestScore) {
+        bestScore = scores[key];
+        best = key;
+      }
+    });
+    return best;
+  }
+
+  function showResult() {
+    const key = getResultType();
+    const type = TYPES[key];
+
+    const badge = document.getElementById("result-badge");
+    badge.textContent = type.emoji;
+    badge.style.background = type.color + "33";
+    badge.classList.remove("pop");
+    void badge.offsetWidth; // 애니메이션 재시작을 위한 리플로우
+    badge.classList.add("pop");
+
+    document.getElementById("result-name").textContent = type.name;
+    document.getElementById("result-name").style.color = type.color;
+    document.getElementById("result-desc").textContent = type.desc;
+
+    const shareBtn = document.getElementById("share-btn");
+    shareBtn.style.background = type.color;
+
+    show("result-screen");
+  }
+
+  function restartQuiz() {
+    show("start-screen");
+  }
+
+  function shareResult() {
+    const key = getResultType();
+    const type = TYPES[key];
+    const text = `나의 일잘러 유형은 "${type.name}"! ${type.desc}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(showToast).catch(showToast);
+    } else {
+      showToast();
+    }
+  }
+
+  function showToast() {
+    const toast = document.getElementById("toast");
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2000);
+  }
+</script>
+
+</body>
+</html>
